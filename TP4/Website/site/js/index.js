@@ -1,132 +1,98 @@
 // This is your JS Entry point... You can add as many as JS files you want if you think it is better!
 
 import axios from 'axios';
-function alphanumeric()
+
+var resultElement = document.getElementById('answer-str');
+var formula = document.getElementById('todoCalci');
+
+function alphanumeric(data)
 {
-    var resultElement = document.getElementById('answer-str');
-    var formula = document.getElementById('todoCalci').value;
-    
-    //console.log(formula);
-    var data = formula;
-    var symbol = /^[\d]+[\*\-\/\+][\d]+$/;
-    var result = symbol.test(data);
-    var div = "/";
-    var sym = inputtxt.search(div);
+    var input = data.split("");
     var number = [];
     var operation = [];
     var count = 0;
-    var result= true;
-    var index = 0;
-    var ans = 0;
+    var result = true;
+    
     number[count] = "";
-    var input = data.split("");
-    var op = "";
-
-
-
-    axios.post('http://localhost:8081/', {
-    method: "post",
-    data:{
-        formula: v1        
-        }
-    })
-    .then((response) =>
-    {
-    if(len!=0)
-    {
-
-        if(result === true){
-        for (i=1;i<len;i++){
-            if (sym[i]===div && sym[i+1]===zer)
-            {
-                console.log(response.status+""+response.statustxt);
-                resultElement.innerHTML = 'math error';
-                return;
-            }
-        }
-        resultElement.innerHTML = 'Valid Input';
-    }
-        else{
-            resultElement.innerHTML = 'Syntax error';
-        }
-
-    }
     
-    else{
-        resultElement.innerHTML = 'Syntax error';
-    }
-
-    console.log(result);
-    
-    })
-    .catch((error) =>
+    for (var i = 0; i < input.length; i++)
     {
-        resultElement.innerHTML = response.error;
-    })
-    
-    
-
-
-    for(var i = 0; i < input.length; i++)
-    {
-        if(input[i]!=0 && result == false)
+        if (isNaN(parseInt(input[i])) && result == false)
         {
-            operation[index] = input[i];
-            index++;
-           
+            operation[count] = input[i];
+            count++;
+            number[count] = "";
+            result = true;
         }
-
         else
         {
-            op = input[i];
-            console.log(op);
-            number[index] += input[i];
-           
+            number[count] += input[i];
+            result = false;
         }
     }
 
-
-document.getElementById('btn-eval').onclick = function()
-{
-    var num1 = parseFloat(number[0]);
-    axios.post('http://localhost:8081/', {
-    method: "post",
-    data:{
-        formula: v1        
-        }
-    })
-    .then((response) =>
+    var num1 = parseFloat(number[0]);  
+    for (var j = 0; j < operation.length; j++)
     {
-        for(var j = 0; j < operation.length; j++)
-        {
-            var num2 = parseFloat(number[j+1]);
-
-            switch (op)
-            {
-                case "+":
-                    ans = num1 + num2;
-                    break;
-
-                case "-":
-                    ans = num1 - num2;
-                    break;
-
-                case "*":
-                    ans = num1 * num2;
-                    break;
-
-                case "/":
-                    ans = num1 / num2;
-                    break;
-            }
+        var num2 = parseFloat(number[j+1]);
+        switch (operation[j]) 
+        { 
+            case "+":
+                num1 = num1 + num2;
+                break;
+            case "-":
+                num1 = num1 - num2;
+                break;
+            case "*":
+                num1 = num1 * num2;
+                break;
+            case "/":
+                num1 = num1 / num2;
+                break;
         }
-        console.log("valid expression");
-        console.log(ans);
-    })
-    .catch((error) =>
-    {
-        resultElement.innerHTML = response.error;
-    })
-
+    }    
+    return num1;
 }
+
+document.getElementById("btn-check").onclick = function()
+{
+    var formulaValue = formula.value;
+    axios.post("http://localhost:8081/", {formula : formulaValue}).then((response) =>
+    {
+        var sym = formulaValue.search("/0");
+
+        if(sym == -1)
+        {
+            resultElement.innerHTML = "Valid input";
+        }
+        else
+        {
+            resultElement.innerHTML = "Math error";
+        }
+    }).catch((error) =>
+    {
+        resultElement.innerHTML = "Syntax error";
+    })
+}
+
+document.getElementById("btn-eval").onclick = function()
+{
+    var formulaValue = formula.value;
+    axios.post("http://localhost:8081/", {formula : formulaValue}).then((response) =>
+    {
+        var sym = formulaValue.search("/0");
+        var ans = alphanumeric(formulaValue);
+
+        if(sym == -1)
+        {
+            resultElement.innerHTML = ans;
+        }
+        else
+        {
+            resultElement.innerHTML = "Math error";
+        }
+    }).catch((error) =>
+    {
+        resultElement.innerHTML = "Syntax error";
+    })
 }
